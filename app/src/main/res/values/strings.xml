@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">WeatherSeeker</string>
+    <string name="title_activity_temp_page">TempPage</string>
+
+    <string name="one">one</string>
+    <string name="two">two</string>
+    <string name="three">three</string>
+    <string name="title_activity_weather_local_search">Map</string>
+    <string name="first">시/도</string>
+    <string name="second">구/군</string>
+    <string name="third">읍/면/동/리</string>
+</resources>

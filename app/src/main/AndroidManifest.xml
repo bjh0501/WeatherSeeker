@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          package="com.leejuhaeun.weatherseeker">
+
+    <meta-data
+            android:name="com.kakao.sdk.AppKey"
+            android:value="3540bc84bb2ca72c5ee782b5a78bff70"/>
+    <!--
+         The ACCESS_COARSE/FINE_LOCATION permissions are not required to use
+         Google Maps Android API v2, but you must specify either coarse or fine
+         location permissions for the 'MyLocation' functionality.
+    -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/> <!-- 네트워크 사용에 대한 퍼미션 -->
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+    <application
+            android:allowBackup="true"
+            android:icon="@drawable/logo"
+            android:roundIcon="@drawable/logo"
+            android:supportsRtl="true"
+            android:theme="@style/AppTheme"
+            android:usesCleartextTraffic="true"
+            android:label="날씨탐정">
+        <activity android:name=".WeatherAdvice.WeatherAdvice">
+
+        </activity>
+        <activity
+                android:name=".WeatherLocalSearch.WeatherLocalSearch"
+                android:label="@string/title_activity_weather_local_search">
+
+        </activity>
+        <activity
+                android:name=".Main.TempPage"
+                android:label="@string/title_activity_weather_local_search">
+
+        </activity>
+        <activity android:name=".Main.SplashScreenActivity"
+                  android:allowBackup="true"
+                  android:icon="@drawable/logo"
+                  android:roundIcon="@drawable/logo"
+                  android:supportsRtl="true"
+                  android:theme="@style/AppTheme"
+                  android:usesCleartextTraffic="true"
+                    android:label="날씨탐정"> <!-- 아래에 인텐트넣기 -->
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+    </application>
+</manifest>
