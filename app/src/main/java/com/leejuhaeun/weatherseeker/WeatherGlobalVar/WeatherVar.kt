@@ -9,7 +9,7 @@ import org.apache.commons.net.ntp.NTPUDPClient
 
 object WeatherVar {
     private val api_key =
-        "1%2BqR%2FGdbnpYk5Reefrc8y7jNomvnl6rTpCnRbZBIZhcai7%2Fk7gQnFz23x%2Bps8pIbHHWAJpMqkmu0FXeqIhUvbQ%3D%3D"
+        "APIKEY"
 
     private val adviceIntent = 1001
     private val localWeatherIntent = 3000
