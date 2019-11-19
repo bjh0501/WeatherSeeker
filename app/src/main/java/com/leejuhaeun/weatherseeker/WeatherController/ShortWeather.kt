@@ -37,7 +37,7 @@ class ShortWeather : WeatherServiceImpl {
 
         if(nTime < 40) {
             val c1 = GregorianCalendar()
-            c1.add(Calendar.DATE, -1) // 오늘날짜로부터 -1
+            c1.add(Calendar.DATE, -1) //-1으로해야 오늘날짜로부터 -1일
             val sdf = SimpleDateFormat("yyyyMMdd") // 날짜 포맷
             convretDate = sdf.format(c1.getTime()) // String으로 저장
             convertTime = "2300"

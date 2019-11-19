@@ -1,68 +1,43 @@
 package com.leejuhaeun.weatherseeker.WeatherAdviceController
 
 import android.util.Log
-import com.leejuhaeun.weatherseeker.WeatherAdviceImpl.WeatherNews
-import com.leejuhaeun.weatherseeker.WeatherApi.Glboal.WeatherVar
-import java.io.BufferedReader
+import com.google.gson.JsonArray
+import com.google.gson.JsonObject
+import com.google.gson.JsonParser
+import com.leejuhaeun.weatherseeker.WeatherAdviceService.WeatherNews
+import org.jsoup.Jsoup
 import java.io.IOException
-import java.io.InputStreamReader
-import java.net.HttpURLConnection
-import java.net.URL
 
 class YonhapWeatherNews: WeatherNews {
     @Throws(IOException::class)
-    override fun getWeatherNews():ArrayList<String>{
+    override fun getWeatherNews():ArrayList<String> {
         val startTime = System.currentTimeMillis()
-
-        var newsData = ArrayList<String>()
+        var arrList = ArrayList<String>()
 
         try {
-            val urlBuilder = StringBuilder("http://www.yonhapnewstv.co.kr/category/news/weather/") /*URL*/
-
-            val url = URL(urlBuilder.toString())
-            val conn = url.openConnection() as HttpURLConnection
-            conn.requestMethod = "GET"
-            // conn.setRequestProperty("Content-type", "application/json");
-            conn.setRequestProperty("Accept-Charset", "UTF-8") // Accept-Charset 설정.
-            conn.doInput = true
-            conn.setRequestProperty("Context_Type", "application/x-www-form-urlencoded;cahrset=UTF-8")
-            val rd: BufferedReader
-
-            if (conn.responseCode >= 200 && conn.responseCode <= 300) {
-                rd = BufferedReader(InputStreamReader(conn.inputStream, "UTF-8"))
-            } else {
-                rd = BufferedReader(InputStreamReader(conn.errorStream, "UTF-8"))
+            var url:String = "https://www.yonhapnewstv.co.kr/news/getNewsList?p=1&ct=9&srt=l&d=20191030"
+            var str = "";
+            try {
+                str = Jsoup.connect(url)
+                    .userAgent("Mozilla")
+                    .ignoreContentType(true)
+                    .execute().body();
+            } catch (e: IOException) {
+                e.printStackTrace()
             }
 
-            var sb= StringBuffer()
+            val parser = JsonParser()
+            val jsonObj = parser.parse(str) as JsonObject
+            val memberArray = jsonObj.get("list") as JsonArray
 
-            var line: String? = null;
-            while ({ line = rd.readLine(); line }() != null) {
-                sb.append(line)
-            }
-
-            rd.close()
-            conn.disconnect()
-
-            val regex = "<h2 class=\"title\">.+?</span>".toRegex()
-            val matchResult = regex.findAll(sb!!)
-            var i = 0;
-
-            var a = WeatherVar.getDate()
-            var b = WeatherVar.getTime()
-            var c = "A"
-
-            matchResult.map {
-                it.groupValues[0]
-            }.forEach {
-                if(it.indexOf(WeatherVar.getDate()) >= 1 ) {
-                    val newTitle:String? = it.replace(".+?rel=\"bookmark\"\\stitle=\"|\">.*".toRegex(),"").replace("&#[0-9]{4};".toRegex(),"\"")
-                    val newLink:String? = it.replace("<h2.+?href=\"|\"\\srel.*".toRegex(),"")
-
-                    newsData.add(i++,newTitle + "gubun"+ newLink)
-                } else {
-                    return newsData;
-                }
+            for (i in 0 until memberArray.size()) {
+                val innerObj = memberArray.get(i) as JsonObject
+                val parser = JsonParser()
+                val element = parser.parse(innerObj.toString())
+                val title = element.getAsJsonObject().get("title").getAsString()
+                val sequence = element.getAsJsonObject().get("sequence").getAsString()
+                val link = "https://www.yonhapnewstv.co.kr/news/" + sequence + "?srt=l&d=Y"
+                arrList.add(title + "gubun" + link)
             }
         }catch (e:Exception) {
             Log.d("errorWeather", e.message)
@@ -71,8 +46,11 @@ class YonhapWeatherNews: WeatherNews {
         val endTime = System.currentTimeMillis()
         val spendTime = endTime - startTime
 
-        return newsData;
+        return arrList
     }
 }
-
-// http://www.yonhapnewstv.co.kr/category/news/weather/
+class weatherVO {
+    val title:String = "";
+    val result:String = "";
+    val link:String = "";
+}

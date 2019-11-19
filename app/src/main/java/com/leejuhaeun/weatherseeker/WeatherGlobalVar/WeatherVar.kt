@@ -1,5 +1,7 @@
 package com.leejuhaeun.weatherseeker.WeatherApi.Glboal
 
+import android.content.Context
+import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import org.apache.commons.lang3.StringUtils
 import java.net.InetAddress
@@ -16,12 +18,29 @@ object WeatherVar {
     private val originIntent = 2000
 
     private val weatherCategory = HashMap<String, String>()
-    private var nx = "77"
-    private var ny = "77"
-    private var sido = "서울특별시"
-    private var gu = "강서구"
-    private var dong = "방화제1동"
+    private var nx = ""
+    private var ny = ""
+    private var n = ""
+    private var sido = ""
+    private var gu = ""
+    private var dong = ""
+    private var location = ""
 
+    fun getLocation():String{
+        return location
+    }
+
+    fun setLocation(location:String) {
+        this.location = location
+    }
+
+    fun getN():String{
+        return n
+    }
+
+    fun setN(n:String) {
+        this.n = n
+    }
 
 
     fun getAdviceIntent():Int {
@@ -130,23 +149,7 @@ object WeatherVar {
     }
 
     fun getCurrentNetworkTime(): Long {
-        val TIME_SERVER = "kr.pool.ntp.org"
-        val lNTPUDPClient = NTPUDPClient()
-        lNTPUDPClient.setDefaultTimeout(3000)
-        var returnTime: Long = 0
-
-        try {
-            lNTPUDPClient.open()
-            val lInetAddress = InetAddress.getByName(TIME_SERVER)
-            val lTimeInfo = lNTPUDPClient.getTime(lInetAddress)
-             returnTime =  lTimeInfo.getReturnTime(); // local time
-            //returnTime = lTimeInfo.getMessage().getTransmitTimeStamp().getTime()   //server time
-        } catch (e: Exception) {
-            e.printStackTrace()
-        } finally {
-            lNTPUDPClient.close()
-        }
-
-        return returnTime
+        return System.currentTimeMillis();
     }
+
 }

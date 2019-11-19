@@ -16,17 +16,17 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 class LocalWeather : WeatherServiceImpl {
-
     @Throws(IOException::class)
     override fun getWeatherInfo(date: String, time: String, nx: String, ny: String): HashMap<String, String> {
         val startTime = System.currentTimeMillis()
 
         var nTime: Int = Integer.parseInt(time)
-        var convertTime:String
+        var convertTime:String = time
 
         // Base_time  : 0200, 0500, 0800, 1100, 1400, 1700, 2000, 2300 (1일 8회)
-        var convretDate = date
+        var convertDate = date
 
+        // 변환 안해도 값은나오는데 해야 모든 값이 다나옴, 즉 무조건해야함
         if(nTime >= 2310 )               convertTime = "2300"
         else if(nTime >= 2010)          convertTime = "2000"
         else if(nTime >= 1710)          convertTime = "1700"
@@ -37,9 +37,9 @@ class LocalWeather : WeatherServiceImpl {
         else if(nTime >= 210)          convertTime = "200"
         else {
             val c1 = GregorianCalendar()
-            c1.add(Calendar.DATE, -1) // 오늘날짜로부터 -1
+            c1.add(Calendar.DATE,-1) // 0으로해야 오늘날짜로부터 -1
             val sdf = SimpleDateFormat("yyyyMMdd") // 날짜 포맷
-            convretDate = sdf.format(c1.getTime()) // String으로 저장
+            convertDate = sdf.format(c1.getTime()) // String으로 저장
             convertTime = "2300"
         }
 
@@ -58,7 +58,7 @@ class LocalWeather : WeatherServiceImpl {
             val urlBuilder =
                 StringBuilder("http://newsky2.kma.go.kr/service/SecndSrtpdFrcstInfoService2/ForecastSpaceData") /*URL*/
             urlBuilder.append("?" + URLEncoder.encode("serviceKey", "UTF-8") + "=" + WeatherVar.API_KEY())
-            urlBuilder.append("&" + URLEncoder.encode("base_date", "UTF-8") + "=" + convretDate)
+            urlBuilder.append("&" + URLEncoder.encode("base_date", "UTF-8") + "=" + convertDate)
             urlBuilder.append(
                 "&" + URLEncoder.encode(
                     "base_time",
@@ -97,26 +97,20 @@ class LocalWeather : WeatherServiceImpl {
             rd.close()
             conn.disconnect()
 
-            // ??
-            val tmn: String? = Regex(pattern = "<category>TMN</category>.+?</item>").find(input = sb!!)?.value
+            val tmn :String? = Regex(pattern = "<category>TMN</category>.+?</item>").find(input = sb)?.value
             weatherData["아침 최저기온"] = tmn!!.replace(".*<fcstValue>|</fcstValue>.*".toRegex(), "") //도
 
-            val tmx: String? = Regex(pattern = "<category>TMX</category>.+?</item>").find(input = sb!!)?.value
+            val tmx :String? = Regex(pattern = "<category>TMX</category>.+?</item>").find(input = sb)?.value
             weatherData["낮 최고기온"] = tmx!!.replace(".*<fcstValue>|</fcstValue>.*".toRegex(), "")
 
-            val sky: String? = Regex(pattern = "<category>SKY</category>.+?</item>").find(input = sb!!)?.value
+            val sky :String? = Regex(pattern = "<category>SKY</category>.+?</item>").find(input = sb)?.value
             weatherData["하늘상태"] = sky!!.replace(".*<fcstValue>|</fcstValue>.*".toRegex(), "")
 
-            val pty: String? = Regex(pattern = "<category>PTY</category>.+?</item>").find(input = sb!!)?.value
+            val pty :String? = Regex(pattern = "<category>PTY</category>.+?</item>").find(input = sb)?.value
             weatherData["강수형태"] = pty!!.replace(".*<fcstValue>|</fcstValue>.*".toRegex(), "")
 
-            weatherData["x"] = nx
-            weatherData["y"] = ny
-            weatherData["error"] = "-99"
 
-            if (StringUtils.isNotBlank(weatherData["category"])) {
-                weatherData["error"] = "0"
-            }
+            Log.d("AA","AA")
         } catch (e:Exception) {
             Log.d("JHTEST",e.message)
         }

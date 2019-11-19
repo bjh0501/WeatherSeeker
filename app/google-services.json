@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "703559356492",
+    "firebase_url": "https://weatherseeker-40afb.firebaseio.com",
+    "project_id": "weatherseeker-40afb",
+    "storage_bucket": "weatherseeker-40afb.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:703559356492:android:a6fda788f41379da",
+        "android_client_info": {
+          "package_name": "com.leejuhaeun.weatherseeker"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "703559356492-76372lqjv0itgp7726d5aieb5jseu5ba.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyABIbVKNbi4iEaG4Yp6ey3Ktq4QWtB3R7I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "703559356492-76372lqjv0itgp7726d5aieb5jseu5ba.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -12,16 +12,12 @@ import java.net.URL
 import java.net.URLEncoder
 import java.util.*
 
-
-
 class DetailDust : DustServiceImpl, AppCompatActivity() {
     @Throws(IOException::class)
     override fun getDustInfo(sido: String, gu: String): HashMap<String, String> {
         val startTime = System.currentTimeMillis()
 
         val weatherData = HashMap<String, String>()
-
-//        이어도 해결해야함
 
         var convertSido:String?
 

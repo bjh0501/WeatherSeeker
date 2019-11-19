@@ -1,5 +1,6 @@
 package com.leejuhaeun.weatherseeker.Main
 
+import android.app.AlertDialog
 import android.app.ProgressDialog
 import android.content.Context
 import android.content.Intent
@@ -14,12 +15,13 @@ import com.leejuhaeun.weatherseeker.WeatherApi.WeatherController.DetailDust
 import com.leejuhaeun.weatherseeker.WeatherApi.WeatherController.LocalWeather
 import com.leejuhaeun.weatherseeker.WeatherApi.WeatherController.ShortWeather
 import com.leejuhaeun.weatherseeker.R
-import com.leejuhaeun.weatherseeker.WeatherLocalSearch.WeatherLocalSearch
+import com.leejuhaeun.weatherseeker.View.WeatherLocalSearch
 import com.leejuhaeun.weatherseeker.WeatherRepository.DatabaseHandler
 import org.apache.commons.lang3.StringUtils
 import org.json.JSONArray
 import java.lang.Exception
 import android.os.Looper
+import com.leejuhaeun.weatherseeker.View.TempPage
 
 
 /**
@@ -29,7 +31,7 @@ import android.os.Looper
  */
 class SplashScreenActivity : AppCompatActivity() {
     private val SPLASH_TIME_OUT:Long=50
-    private val LOCAL_DATA_CNT:Int=3780
+    private val LOCAL_DATA_CNT:Int=3755
 
     override fun onCreate(savedInstanceState: Bundle?) {
         val policy = StrictMode.ThreadPolicy.Builder().permitAll().build()
@@ -44,8 +46,6 @@ class SplashScreenActivity : AppCompatActivity() {
 
         if(ninfo != null) {
             val handler = Handler()
-
-
 
             handler.postDelayed({
                 val intent = Intent(this@SplashScreenActivity, TempPage::class.java)
@@ -71,8 +71,6 @@ class SplashScreenActivity : AppCompatActivity() {
 
                 Thread(Runnable {
                     try {
-                        // 시가 입력된경우
-
                         Looper.prepare(); // 스레드안에서 스레드돌리기
                         kotlin.run {
 
@@ -82,6 +80,9 @@ class SplashScreenActivity : AppCompatActivity() {
                                 WeatherVar.setDong(getData("Dong"))
                                 WeatherVar.setNX(getData("NX"))
                                 WeatherVar.setNY(getData("NY"))
+                                WeatherVar.setN(getData("N"))
+                                WeatherVar.setLocation(getData("Location"))
+
 
                                 var detailDust:HashMap<String, String> = detailDust()
                                 var shortWeather:HashMap<String, String> = shortWeather()
@@ -122,8 +123,10 @@ class SplashScreenActivity : AppCompatActivity() {
                                     val thirdStep: String = jObject.getString("3단계")
                                     val nx: String = jObject.getString("격자 X")
                                     val ny: String = jObject.getString("격자 Y")
+                                    val n: String = jObject.getString("중기코드")
+                                    val location: String = jObject.getString("출몰지역")
 
-                                    val success = dbHandler!!.initLocalData(firstStep, secondStep, thirdStep, nx, ny)
+                                    val success = dbHandler!!.initLocalData(firstStep, secondStep, thirdStep, nx, ny, n, location)
 
                                     progressBarStatus = (i + 1)
 
@@ -161,10 +164,14 @@ class SplashScreenActivity : AppCompatActivity() {
                 }).start()
             }, SPLASH_TIME_OUT)
         } else {
-            val intent = Intent(applicationContext, TempPage::class.java)
-            startActivity(intent)
-
-            finish()
+            val builder = AlertDialog.Builder(this)
+            builder.setMessage("데이터나 와이파이를 켜주신 후\n다시 어플을 실행해 주세요.")
+                .setCancelable(false)
+                .setPositiveButton("OK") { dialog, id ->
+                    finish()
+                }
+            val alert = builder.create()
+            alert.show()
         }
     }
 
@@ -175,17 +182,34 @@ class SplashScreenActivity : AppCompatActivity() {
             val vDetailDust = DetailDust().getDustInfo(WeatherVar.getSido(), WeatherVar.getGu())
 
             if(vDetailDust.get("pm25Value").equals("지역미지원")) {
+                setData("미세먼지상태", "0")
                 hashData.put("미세먼지", "지역미지원");
                 hashData.put("미세먼지 아이콘", R.drawable.dustgood.toString());
             } else {
-                hashData.put("미세먼지", vDetailDust.get("pm25Value") + "/" + vDetailDust.get("pm10Value"));
+                if(vDetailDust.get("pm25Value").equals("-")) {
+                    setData("미세먼지상태", "0")
+                    hashData.put("미세먼지", "정보없음");
+                    hashData.put("미세먼지 아이콘", R.drawable.dustgood.toString());
+                } else {
+                    var dustIcon: Int
 
-                val dustIcon = (if (Integer.parseInt(vDetailDust.get("pm25Value")) >= 76) R.drawable.dustverybad
-                else if (Integer.parseInt(vDetailDust.get("pm25Value")) >= 36) R.drawable.dustbad
-                else if (Integer.parseInt(vDetailDust.get("pm25Value")) >= 16) R.drawable.dustclean
-                else R.drawable.dustgood)
+                    if (Integer.parseInt(vDetailDust.get("pm25Value")) >= 76) {
+                        dustIcon = R.drawable.dustverybad
+                        setData("미세먼지상태", "4")
+                    } else if (Integer.parseInt(vDetailDust.get("pm25Value")) >= 36) {
+                        dustIcon = R.drawable.dustbad
+                        setData("미세먼지상태", "3")
+                    } else if (Integer.parseInt(vDetailDust.get("pm25Value")) >= 16) {
+                        dustIcon = R.drawable.dustclean
+                        setData("미세먼지상태", "2")
+                    } else {
+                        dustIcon = R.drawable.dustgood
+                        setData("미세먼지상태", "1")
+                    }
 
-                hashData.put("미세먼지 아이콘", dustIcon.toString());
+                    hashData.put("미세먼지", vDetailDust.get("pm25Value") + "/" + vDetailDust.get("pm10Value"));
+                    hashData.put("미세먼지 아이콘", dustIcon.toString());
+                }
             }
         } catch (e: Exception) {
             e.printStackTrace()
@@ -230,6 +254,8 @@ class SplashScreenActivity : AppCompatActivity() {
             hashData.put("풍속", vShortWeather.get("풍속") + "m/s")
             hashData.put("1시간 강수량", vShortWeather.get("1시간 강수량")+ "mm")
 
+            setData("기온", vShortWeather.get("기온").toString())
+
             if(vShortWeather.get("습도").equals("-998")) {
                 hashData.put("습도", "측정불가")
             } else {
@@ -254,17 +280,35 @@ class SplashScreenActivity : AppCompatActivity() {
             hashData.put("낮 최고기온", vLocalWeather.get("낮 최고기온") + "º")
             hashData.put("아침 최저기온", vLocalWeather.get("아침 최저기온") + "º")
 
-            val weatherState = (if(vLocalWeather.get("강수형태").equals("0")) {
-                if(vLocalWeather.get("하늘상태").equals("1"))           R.drawable.sunny
-                else if(vLocalWeather.get("하늘상태").equals("2"))          R.drawable.littlecloud
-                else if(vLocalWeather.get("하늘상태").equals("3"))          R.drawable.manycloud
-                else                                                                R.drawable.cloudy
-            } else if(vLocalWeather.get("강수형태").equals("1"))        R.drawable.rain
-            else if(vLocalWeather.get("강수형태").equals("2"))          R.drawable.rainsnow
-            else                                                                R.drawable.snow)
+            var weatherState:Int
+
+            if(vLocalWeather.get("강수형태").equals("0")) {
+                if(vLocalWeather.get("하늘상태").equals("1")) {
+                    weatherState = R.drawable.sunny
+                } else if(vLocalWeather.get("하늘상태").equals("2")) {
+                    weatherState = R.drawable.littlecloud
+                } else if(vLocalWeather.get("하늘상태").equals("3")) {
+                    weatherState = R.drawable.manycloud
+                } else {
+                    weatherState = R.drawable.cloudy
+                }
+
+                setData("강수형태", "0")
+            } else if(vLocalWeather.get("강수형태").equals("1")) {
+                weatherState = R.drawable.rain
+                setData("강수형태", "1")
+            } else if(vLocalWeather.get("강수형태").equals("2")) {
+                weatherState = R.drawable.rainsnow
+                setData("강수형태", "2")
+            } else if(vLocalWeather.get("강수형태").equals("3")) {
+                weatherState = R.drawable.snow
+                setData("강수형태", "3")
+            } else {
+                weatherState = R.drawable.none
+            }
 
             hashData.put("기상상태", weatherState.toString())
-        } catch (e: java.lang.Exception) {
+        } catch (e: Exception) {
             e.printStackTrace()
         }
 

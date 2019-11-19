@@ -16,7 +16,7 @@ class DatabaseHandler(context: Context) :SQLiteOpenHelper(context, DB_NAME, null
 
     override fun onCreate(db: SQLiteDatabase?) {
         val CREATE_TABLE = "CREATE TABLE $TABLE_NAME" +
-                "($NO INTEGER PRIMARY KEY AUTOINCREMENT, $FIRST_STEP TEXT, $SECOND_STEP TEXT, $THIRD_STEP TEXT, $NX TEXT, $NY TEXT, " +
+                "($NO INTEGER PRIMARY KEY AUTOINCREMENT, $FIRST_STEP TEXT, $SECOND_STEP TEXT, $THIRD_STEP TEXT, $NX TEXT, $NY TEXT, $N TEXT, $LOCATION TEXT," +
                 "  UNIQUE ($FIRST_STEP,$SECOND_STEP,$THIRD_STEP));"
         db?.execSQL(CREATE_TABLE)
     }
@@ -53,16 +53,18 @@ class DatabaseHandler(context: Context) :SQLiteOpenHelper(context, DB_NAME, null
         var selectALLQuery = ""
 
         if(third != "") {
-            selectALLQuery = "SELECT DISTINCT $NX, $NY FROM $TABLE_NAME WHERE $FIRST_STEP = \"$first\" AND $SECOND_STEP = \"$second\" AND $THIRD_STEP = \"$third\""
+            selectALLQuery = "SELECT DISTINCT $NX, $NY ,$N, $LOCATION FROM $TABLE_NAME WHERE $FIRST_STEP = \"$first\" AND $SECOND_STEP = \"$second\" AND $THIRD_STEP = \"$third\""
         } else if(second != "") {
-            selectALLQuery = "SELECT DISTINCT $NX, $NY FROM $TABLE_NAME WHERE $FIRST_STEP = \"$first\" AND $SECOND_STEP = \"$second\" AND $THIRD_STEP = \"NULL\""
+            selectALLQuery = "SELECT DISTINCT $NX, $NY ,$N, $LOCATION FROM $TABLE_NAME WHERE $FIRST_STEP = \"$first\" AND $SECOND_STEP = \"$second\" AND $THIRD_STEP = \"NULL\""
         } else {
-            selectALLQuery = "SELECT DISTINCT $NX, $NY FROM $TABLE_NAME WHERE $FIRST_STEP = \"$first\" AND $SECOND_STEP = \"NULL\" AND $THIRD_STEP = \"NULL\""
+            selectALLQuery = "SELECT DISTINCT $NX, $NY ,$N, $LOCATION FROM $TABLE_NAME WHERE $FIRST_STEP = \"$first\" AND $SECOND_STEP = \"NULL\" AND $THIRD_STEP = \"NULL\""
         }
 
         val cursor = db.rawQuery(selectALLQuery, null)
         var nx: String =""
         var ny : String =""
+        var n : String =""
+        var location : String =""
 
         var nxnyInfo = HashMap<String, String>()
 
@@ -73,9 +75,13 @@ class DatabaseHandler(context: Context) :SQLiteOpenHelper(context, DB_NAME, null
                 do {
                     nx = cursor.getString(cursor.getColumnIndex(NX))
                     ny = cursor.getString(cursor.getColumnIndex(NY))
+                    n = cursor.getString(cursor.getColumnIndex(N))
+                    location = cursor.getString(cursor.getColumnIndex(LOCATION))
 
-                    nxnyInfo.put("NX", nx)
+                    nxnyInfo.set("NX", nx)
                     nxnyInfo.set("NY", ny)
+                    nxnyInfo.set("N", n)
+                    nxnyInfo.set("LOCATION", location)
                 } while (cursor.moveToNext())
             }
         }
@@ -172,7 +178,7 @@ class DatabaseHandler(context: Context) :SQLiteOpenHelper(context, DB_NAME, null
         return arrThirdStep
     }
 
-    fun initLocalData(s1: String, s2: String, s3: String, x:String, y:String): Boolean {
+    fun initLocalData(s1: String, s2: String, s3: String, x:String, y:String, n:String, location:String): Boolean {
         //Create and/or open a database that will be used for reading and writing.
         val db = this.writableDatabase
         val values = ContentValues()
@@ -183,6 +189,8 @@ class DatabaseHandler(context: Context) :SQLiteOpenHelper(context, DB_NAME, null
         values.put(THIRD_STEP, s3)
         values.put(NX, x)
         values.put(NY, y)
+        values.put(N, n)
+        values.put(LOCATION, location)
 
         val _success = db.insert(TABLE_NAME, null, values)
 
@@ -202,6 +210,8 @@ class DatabaseHandler(context: Context) :SQLiteOpenHelper(context, DB_NAME, null
         private val THIRD_STEP = "THRID_STEP";
         private val NX = "NX";
         private val NY = "NY";
+        private val N = "N";
+        private val LOCATION = "LOCATION";
     }
 }
 
